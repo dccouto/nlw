@@ -2,7 +2,6 @@ package com.coutech.certificado.modules.questions.dto;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.coutech.certificado.modules.questions.entities.QuestionEntity;
 
@@ -19,11 +18,9 @@ public class QuestionResultDTO {
 	List<AlternativeResultDTO> alternatives;
 
 	public static List<QuestionResultDTO> toListDto(List<QuestionEntity> entities) {
-		return entities.stream().map(question -> new QuestionResultDTO(question.getId(), question.getTechnology(),
-				question.getDescription(),
-				question.getAlternatives().stream()
-						.map(alternative -> new AlternativeResultDTO(alternative.getId(), alternative.getDescription()))
-						.collect(Collectors.toList())))
+		return entities.stream()
+				.map(question -> new QuestionResultDTO(question.getId(), question.getTechnology(),
+						question.getDescription(), AlternativeResultDTO.toListDto(question.getAlternatives())))
 				.toList();
 	}
 
