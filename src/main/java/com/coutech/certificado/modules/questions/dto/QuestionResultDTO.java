@@ -6,10 +6,12 @@ import java.util.UUID;
 import com.coutech.certificado.modules.questions.entities.QuestionEntity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @AllArgsConstructor
+@Builder
 public class QuestionResultDTO {
 	private UUID id;
 	private String technology;
@@ -19,8 +21,9 @@ public class QuestionResultDTO {
 
 	public static List<QuestionResultDTO> toListDto(List<QuestionEntity> entities) {
 		return entities.stream()
-				.map(question -> new QuestionResultDTO(question.getId(), question.getTechnology(),
-						question.getDescription(), AlternativeResultDTO.toListDto(question.getAlternatives())))
+				.map(question -> QuestionResultDTO.builder().id(question.getId()).technology(question.getTechnology())
+						.description(question.getDescription())
+						.alternatives(AlternativeResultDTO.toListDto(question.getAlternatives())).build())
 				.toList();
 	}
 
