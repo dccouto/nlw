@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @Service
-public class FindByTechnology {
+public class FindByTechnologyUseCase {
 
 	private final QuestionRepository repository;
 

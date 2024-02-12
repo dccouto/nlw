@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coutech.certificado.modules.questions.dto.QuestionResultDTO;
-import com.coutech.certificado.modules.questions.useCases.FindByTechnology;
+import com.coutech.certificado.modules.questions.useCases.FindByTechnologyUseCase;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/question")
 public class QuestionController {
 	
-	private final FindByTechnology findByTechnology;
+	private final FindByTechnologyUseCase findByTechnology;
 	
 	@GetMapping("/technology/{technology}")
 	public ResponseEntity<?> findByTechnology(@PathVariable String technology){
