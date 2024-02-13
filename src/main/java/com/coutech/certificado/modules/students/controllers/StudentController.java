@@ -30,9 +30,13 @@ public class StudentController {
 	
 	@PostMapping("/cetification/answer")
 	public ResponseEntity<?> certificationAnswer(@RequestBody StudentCertificationAnswersDTO dto) {
+		try {
+			return ResponseEntity.ok(studentCertificationAnswersUseCase.execute(dto));
+		}catch (RuntimeException e) {
+			return ResponseEntity.badRequest().body(e.getMessage());
+		}
 		
 		
-		return ResponseEntity.ok(studentCertificationAnswersUseCase.execute(dto));
 	}
 
 }

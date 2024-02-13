@@ -1,10 +1,18 @@
 package com.coutech.certificado.modules.students.useCases;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.springframework.stereotype.Service;
 
 import com.coutech.certificado.modules.questions.repositories.QuestionRepository;
 import com.coutech.certificado.modules.students.dto.StudentCertificationAnswersDTO;
-import com.coutech.certificado.modules.students.repositories.StudentRepository;
+import com.coutech.certificado.modules.students.dto.VerifyhasCertificationDTO;
+import com.coutech.certificado.modules.students.entities.AnswersCertificantionEntity;
+import com.coutech.certificado.modules.students.entities.CertificationStudentEntity;
+import com.coutech.certificado.modules.students.entities.StudentEntity;
+import com.coutech.certificado.modules.students.repositories.CertificationStudentRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,15 +20,27 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class StudentCertificationAnswersUseCase {
 
-	private final StudentRepository repository;
 	private final QuestionRepository questionRepository;
+	private final CertificationStudentRepository certificationStudentRepository;
 
-	public StudentCertificationAnswersDTO execute(StudentCertificationAnswersDTO dto) {
-//		if (!repository.existsByEmail(dto.getEmail())) {
-//			throw new IllegalArgumentException();
-//		}
+	private final SaveEstudentIfNotExistUseCase saveEstudentIfNotExistUseCase;
+	private final VerifyIfHasCertificationUseCase hasCertificationUseCase;
+
+	public CertificationStudentEntity execute(StudentCertificationAnswersDTO dto) {
+
+		if (hasCertificationUseCase.execute(
+				VerifyhasCertificationDTO.builder().email(dto.getEmail()).technology(dto.getTechnology()).build())) {
+			throw new RuntimeException("Certificação já obtida");
+		}
+
+		var studentEntity = saveEstudentIfNotExistUseCase
+				.execute(StudentEntity.builder().email(dto.getEmail()).build());
 
 		var questions = questionRepository.findByTechnology(dto.getTechnology());
+
+		List<AnswersCertificantionEntity> answers = new ArrayList<>();
+
+		AtomicInteger correctAnswers = new AtomicInteger(0);
 
 		dto.getQuestions().stream().forEach(qa -> {
 
@@ -32,12 +52,27 @@ public class StudentCertificationAnswersUseCase {
 
 			if (alternativeCorrect.getId().equals(qa.getAlternativeId())) {
 				qa.setIsCorrect(Boolean.TRUE);
+				correctAnswers.incrementAndGet();
 			} else {
 				qa.setIsCorrect(Boolean.FALSE);
 			}
 
+			answers.add(AnswersCertificantionEntity.builder().answerId(qa.getQuestionId())
+					.questionId(qa.getQuestionId()).isCorrect(qa.getIsCorrect()).build());
+
 		});
-		return dto;
+		CertificationStudentEntity certificationStudentEntity = CertificationStudentEntity.builder()
+				.studentEntity(studentEntity).grade(correctAnswers.get()).technology(dto.getTechnology()).build();
+
+		certificationStudentRepository.save(certificationStudentEntity);
+
+		answers.stream().forEach(aw -> {
+			aw.setCertificationId(certificationStudentEntity.getId());
+			aw.setCertificationStudentEntity(certificationStudentEntity);
+		});
+		certificationStudentEntity.setAnswersCertifications(answers);
+		return certificationStudentRepository.save(certificationStudentEntity);
+
 	}
 
 }
