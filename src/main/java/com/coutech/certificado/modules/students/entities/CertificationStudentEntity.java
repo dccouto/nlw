@@ -34,12 +34,13 @@ public class CertificationStudentEntity {
 	@Column(name = "DS_TECHNOLOGY")
 	private String technology;
 	
-	@Column(name = "DS_GRADE")
+	@Column(name = "DS_GRADE", length = 10)
 	private int grade;
 	
 		
 	@ManyToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name  = "FK_STUDENT")
+	@JsonManagedReference
 	private StudentEntity studentEntity;
 	
 	@OneToMany(cascade = CascadeType.ALL)
